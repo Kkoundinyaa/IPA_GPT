@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=gpt2_finetune_rus_pol
+#SBATCH --job-name=gpt2_finetune_eng_esp
 #SBATCH --account=PAS2836
 #SBATCH --output=/fs/ess/PAS2836/ipa_gpt/jobs/logs/%x-%j.out
 #SBATCH --error=/fs/ess/PAS2836/ipa_gpt/jobs/logs/errors/%x-%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
-#SBATCH --time=03:00:00
+#SBATCH --time=05:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --gpus-per-node=1
 
@@ -13,19 +13,11 @@ echo "===== [$(date)] JOB STARTED ====="
 
 export BASH_ENV=/dev/null
 
-# Load required modules
-
 module load cuda/12.4.1
 
-export HF_HOME="/users/PAS2836/krishnakb/hf_cache"
+export HF_HOME="/users/PAS2836/krishnakb/hf_cache_new"
 export TRANSFORMERS_CACHE="$HF_HOME"
 export HF_DATASETS_CACHE="$HF_HOME"
-
-# export HF_HOME="/users/PAS2836/krishnakb/hf_cache"
-# export HF_DATASETS_CACHE="/users/PAS2836/krishnakb/hf_cache"
-# export TRANSFORMERS_CACHE="/users/PAS2836/krishnakb/hf_cache"
-
-
 
 unset CONDA_PREFIX
 unset CONDA_DEFAULT_ENV
@@ -39,8 +31,6 @@ export PYTHONPATH="$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH"
 
 git config --global --add safe.directory /fs/scratch/PAS2836/ipa_gpt/github/IPA_Finetuning
 
-
-
 echo "Python: $(which python) ($(python --version))"
 
 train_lang="both"
@@ -49,14 +39,10 @@ for arg in "$@"; do
   case $arg in
     --train-lang=*) train_lang="${arg#*=}";;
     --eval-lang=*) eval_lang="${arg#*=}";;
-    *)
-      echo "unknown argument: $arg"
-      exit 1
-      ;;
+    *) echo "unknown argument: $arg"; exit 1;;
   esac
 done
 
-# setup paths
 scratch_prefix="/fs/scratch/PAS2836/ipa_gpt"
 scratch_github_prefix="$scratch_prefix/github"
 scratch_hf_cache_prefix="$scratch_prefix/cache"
@@ -81,18 +67,19 @@ echo "===== [$(date)] RUNNING PYTHON SCRIPT ====="
 mkdir -p "$scratch_prefix/checkpoints"
 chmod -R u+w "$scratch_prefix/checkpoints"
 
-# Run the actual script
 TQDM_DISABLE=1 python /users/PAS2836/krishnakb/finetuning-exp.py \
   "$SLURM_JOB_ID" "xnli" \
-  russian_polish_ipa_12_5_50k russian_polish_normal_12_5_50k \
-  bpe-rus-pol-ipa-number-preservation bpe-rus-pol-normal-number-preservation \
-  rus pol \
-  iggy12345/xnli-ru-ipa iggy12345/cdsc-e-ipa \
+  english_spanish_ipa_12_5_medium_50k_3epoch english_spanish_normal_12_5_medium_50k_3epoch \
+  bpe-eng-spa-ipa-number-preservation bpe-eng-spa-normal-number-preservation \
+  en es \
+  iggy12345/xnli-en-ipa iggy12345/xnli-es-ipa \
   --lang-1-features premise hypothesis \
-  --lang-2-features sentence_A sentence_B \
+  --lang-2-features premise hypothesis \
   --eval-feature label label \
   --train-lang "$train_lang" \
   --eval-lang "$eval_lang" \
+  --num-classes 3 \
+  --is-medium \
   --training-checkpoint-prefix /users/PAS2836/krishnakb/ipa_finetune_ckpts \
   --hf-cache /users/PAS2836/krishnakb/hf_cache_new
 

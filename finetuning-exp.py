@@ -198,4 +198,9 @@ if __name__ == "__main__":
         results = trainer.evaluate()
         print(results)
 
+        with open(str(temporary_output_dir / f"{model_type}_metrics.txt"), "w") as f:
+            for k, v in results.items():
+                print(f"{k}: {v}")
+                f.write(f"{k}: {v}\n")
+
         wrun.finish()

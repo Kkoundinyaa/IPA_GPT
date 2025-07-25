@@ -5,6 +5,9 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 
 # class GPTForSequenceClassification(nn.Module):
 #     def __init__(self, pretrained_model, num_classes=2):
+#         super().__init__()
+#         self.pretrained_model = pretrained_model
+#         self.num_classes = num_classes
 #         self.dropout_rate = pretrained_model.config.dropout
 #         self.hidden_size = pretrained_model.config.n_embd
 #
@@ -17,9 +20,6 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 #             self.classifier[1].weight.data.normal_(mean=0.0, std=0.02)
 #
 #     def forward(self, input_ids=None, attention_mask=None, labels=None, **kwargs):
-#         super().__init__()
-#         self.pretrained_model = pretrained_model
-#         self.num_classes = num_classes
 #         hidden_states = self.pretrained_model(input_ids)  # (batch_size, seq_len, hidden_size)
 #
 #         pooled_output = hidden_states[:, -1, :]  # last token hidden state

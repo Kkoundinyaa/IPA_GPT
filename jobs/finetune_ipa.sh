@@ -11,12 +11,24 @@
 
 echo "===== [$(date)] JOB STARTED ====="
 
+export BASH_ENV=/dev/null
+
 # Load required modules
-module load miniconda3/24.1.2-py310 cuda/12.4.1
-conda init bash
-conda activate nanogpt_cu124  # TODO change this to your personal environment
+module load cuda/12.4.1
+
+unset CONDA_PREFIX
+unset CONDA_DEFAULT_ENV
+unset CONDA_PYTHON_EXE
+unset CONDA_EXE
+hash -r
+
+# ✅ Activate your VENV manually
+export PATH="/users/PAS2836/krishnakb/ondemand/krishna_proj/cleanenv/bin:$PATH"
+export VIRTUAL_ENV="/users/PAS2836/krishnakb/ondemand/krishna_proj/cleanenv"
+export PYTHONPATH="$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH"
 
 echo "Python: $(which python) ($(python --version))"
+
 
 # setup paths
 scratch_prefix="/fs/scratch/PAS2836/ipa_gpt"
